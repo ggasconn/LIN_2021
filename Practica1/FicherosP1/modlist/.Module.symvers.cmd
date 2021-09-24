@@ -1,0 +1,1 @@
+cmd_/home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/Module.symvers := sed 's/ko$$/o/' /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/modules.order | scripts/mod/modpost -m    -o /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/Module.symvers -e -i Module.symvers   -T -
