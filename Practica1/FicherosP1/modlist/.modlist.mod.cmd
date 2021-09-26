@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/modlist.mod := { echo  /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/modlist.o;  echo; } > /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/modlist/modlist.mod

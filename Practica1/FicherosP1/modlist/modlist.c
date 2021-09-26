@@ -21,22 +21,30 @@ struct list_item {
 
 void addNewItem(int num) {
   struct list_item *item = NULL;
-  struct list_head *node = NULL;
 
-  // Allocate memory for the new item
-  item = (struct list_item *)vmalloc(sizeof(struct list_item));
-  // Store the data on the returned memory position
-  item->data = num;
-
-  // Add node to the end of the list
-  list_add_tail(&item->links, &myList);
+  item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
+  item->data = num; // Store the data on the returned memory position
+  
+  list_add_tail(&item->links, &myList); // Add node to the end of the list
 }
 
 void removeItem(int num) {
+  struct list_head *pos = NULL;
+  struct list_head *aux = NULL;
+  struct list_item *item = NULL;
 
+  list_for_each_safe(pos, aux, &myList) {
+    
+    item = list_entry(pos, struct list_item, links); // Retrieve node from list to later free its memory
+
+    if (item->data == num) {
+      list_del(pos); // Delete node
+      vfree(item); 
+    }
+  }
 }
 
-void cleanup() {
+void cleanup(void) {
   struct list_head *pos = NULL;
   struct list_head *aux = NULL;
   struct list_item *item = NULL;
@@ -57,7 +65,7 @@ static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t l
   if ((*off) > 0) /* The application can write in this entry just once !! */
     return 0;
   
-  if (len > available_space) {
+  if (len > availableSpace) {
     printk(KERN_INFO ">>> MODLIST: not enough space!!\n");
     return -ENOSPC;
   }
@@ -72,45 +80,52 @@ static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t l
     addNewItem(num);
     printk(KERN_INFO ">>> MODLIST: Im adding a new node\n");
   } else if (sscanf(myBuffer, "remove %d", &num) == 1) {
+    removeItem(num);
     printk(KERN_INFO ">>> MODLIST: Im removing a new node\n");
   } else if (strcmp(myBuffer, "cleanup") == 1) {
+    cleanup();
     printk(KERN_INFO ">>> MODLIST: Im cleaning up the list...\n");
   } else {
     cleanup();
     printk(KERN_INFO ">>> MODLIST: ERROR! Command %s is not valid\n", myBuffer);
   }
   
-  *off += len;
+  (*off)+=len;  /* Update the file pointer */
 
   return len;
 }
 
 static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
-  int nr_bytes;
+  int nrBytes = 0;
+  char myBuffer[BUFFER_LENGTH] = "";
+  /* 
+    Stores a pointer to the buffer. Each time the buffer is written the pointer 
+    moves n bytes forward, being n the amount of bytes written to the buffer.
+  */
+  char *bufferPtr = myBuffer;
+
   struct list_item *item;
   struct list_head *pos;
-  char myBuffer[BUFFER_LENGTH];
   
   if ((*off) > 0) /* Tell the application that there is nothing left to read */
       return 0;
 
   list_for_each(pos, &myList) {
     item = list_entry(pos, struct list_item, links);
-    
+    bufferPtr += sprintf(bufferPtr, "%d\n", item->data); // sprintf return value to myBuffer's address
+    nrBytes += sizeof(item->data) + 1; // item size + newline char
   }
-    
-  nr_bytes = strlen(clipboard);
-    
-  if (len < nr_bytes)
+        
+  if (len < nrBytes)
     return -ENOSPC;
   
-    /* Transfer data from the kernel to userspace */  
-  if (copy_to_user(buf, clipboard,nr_bytes))
+  /* Transfer data from the kernel to userspace */  
+  if (copy_to_user(buf, myBuffer, nrBytes))
     return -EINVAL;
     
   (*off)+=len;  /* Update the file pointer */
 
-  return nr_bytes; 
+  return nrBytes; 
 }
 
 static const struct proc_ops proc_entry_fops = {
@@ -118,7 +133,6 @@ static const struct proc_ops proc_entry_fops = {
     .proc_write = modlist_write,    
 };
 
-/* Función que se invoca cuando se carga el módulo en el kernel */
 int modlist_init(void) {
 	int ret = 0;
 
@@ -136,14 +150,12 @@ int modlist_init(void) {
 	return ret;
 }
 
-/* Función que se invoca cuando se descarga el módulo del kernel */
 void modlist_exit(void) {
   cleanup(); // Delete linked list and free all the allocated memory
 	remove_proc_entry("modlist", NULL);
 	printk(KERN_INFO ">>> MODLIST: Correctly unloaded.\n");
 }
 
-/* Declaración de funciones init y exit */
+/* init and exit rewritten declarations */
 module_init(modlist_init);
 module_exit(modlist_exit);
-
