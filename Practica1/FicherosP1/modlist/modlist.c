@@ -82,7 +82,7 @@ static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t l
   } else if (sscanf(myBuffer, "remove %d", &num) == 1) {
     removeItem(num);
     printk(KERN_INFO ">>> MODLIST: Im removing a new node\n");
-  } else if (strcmp(myBuffer, "cleanup") == 1) {
+  } else if (strcmp(myBuffer, "cleanup\n") == 0) {
     cleanup();
     printk(KERN_INFO ">>> MODLIST: Im cleaning up the list...\n");
   } else {

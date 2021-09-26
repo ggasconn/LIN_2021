@@ -13,22 +13,32 @@ if [ $? -ne 0 ]; then
 	exit -1
 fi
 
-cat /proc/modlist
-
-echo -e add 1 > /proc/modlist
-echo -e add 2 > /proc/modlist
-echo -e add 3 > /proc/modlist
-echo -e add 4 > /proc/modlist
-
-cat /proc/modlist
+cat /proc/modlist 
 echo -e "\n"
 
-echo -e remove 2 > /proc/modlist
+echo add 10 > /proc/modlist
 
-cat /proc/modlist
+cat /proc/modlist 
 echo -e "\n"
 
-echo -e cleanup > /proc/modlist
+echo add 4 > /proc/modlist
+echo add 4 > /proc/modlist
+
+cat /proc/modlist 
+echo -e "\n"
+
+echo add 2 > /proc/modlist
+echo add 5 > /proc/modlist
+
+cat /proc/modlist 
+echo -e "\n"
+
+echo remove 4 > /proc/modlist 
+
+cat /proc/modlist 
+echo -e "\n"
+
+echo cleanup > /proc/modlist 
 
 cat /proc/modlist
 echo -e "\n"
