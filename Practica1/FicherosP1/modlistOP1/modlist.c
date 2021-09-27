@@ -14,20 +14,60 @@ static struct proc_dir_entry *proc_entry;
 
 struct list_head myList;
 
+#ifdef PARTE_OPCIONAL
+struct list_item {
+  char* data;
+  struct list_head links;
+};
+#else
 struct list_item {
   int data;
   struct list_head links;
 };
+#endif
 
+#ifdef PARTE_OPCIONAL
+void addNewItem(char str[]) {
+  struct list_item *item = NULL;
+  char* s;
+
+  item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
+
+  s = (char *)vmalloc(strlen(str));
+  memcpy(s, str, strlen(str));
+  item->data = s;
+
+  list_add_tail(&item->links, &myList); // Add node to the end of the list
+}
+#else
 void addNewItem(int num) {
   struct list_item *item = NULL;
 
   item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
   item->data = num; // Store the data on the returned memory position
-  
+
   list_add_tail(&item->links, &myList); // Add node to the end of the list
 }
+#endif
 
+#ifdef PARTE_OPCIONAL
+void removeItem(char str[]) {
+  struct list_head *pos = NULL;
+  struct list_head *aux = NULL;
+  struct list_item *item = NULL;
+
+  list_for_each_safe(pos, aux, &myList) {
+    
+    item = list_entry(pos, struct list_item, links); // Retrieve node from list to later free its memory
+
+    if (strcmp((char *)item->data, str) == 0) {
+      list_del(pos); // Delete node
+      vfree(item->data); // Free string memory
+      vfree(item);
+    }
+  }
+}
+#else
 void removeItem(int num) {
   struct list_head *pos = NULL;
   struct list_head *aux = NULL;
@@ -43,6 +83,7 @@ void removeItem(int num) {
     }
   }
 }
+#endif
 
 void cleanup(void) {
   struct list_head *pos = NULL;
@@ -53,14 +94,23 @@ void cleanup(void) {
     // Retrieve node from list to later delete it and free its memory
     item = list_entry(pos, struct list_item, links);
     list_del(pos); // Delete node
+
+    #ifdef PARTE_OPCIONAL
+    vfree(item->data);
+    #endif
+
     vfree(item); // Free memory allocated to store data
   }
 }
 
 static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
-  int num;
   int availableSpace = BUFFER_LENGTH - 1;
   char myBuffer[BUFFER_LENGTH];
+  #ifdef PARTE_OPCIONAL
+  char str[BUFFER_LENGTH];
+  #else
+  int num;
+  #endif
 
   if ((*off) > 0) /* The application can write in this entry just once !! */
     return 0;
@@ -76,17 +126,25 @@ static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t l
   myBuffer[len] = '\0'; // Built a proper ending string
 
   // Parse buffer content looking for commands
+  #ifdef PARTE_OPCIONAL
+  if (sscanf(myBuffer, "add %s", str) == 1) {
+    addNewItem(str);
+    printk(KERN_INFO ">>> MODLIST: Im adding a new node\n");
+  } else if (sscanf(myBuffer, "remove %s", str) == 1) {
+    removeItem(str);
+    printk(KERN_INFO ">>> MODLIST: Im removing a new node\n");
+  #else
   if (sscanf(myBuffer, "add %d", &num) == 1) {
     addNewItem(num);
     printk(KERN_INFO ">>> MODLIST: Im adding a new node\n");
   } else if (sscanf(myBuffer, "remove %d", &num) == 1) {
     removeItem(num);
     printk(KERN_INFO ">>> MODLIST: Im removing a new node\n");
-  } else if (strcmp(myBuffer, "cleanup\n") == 0) {
+  #endif
+  } else if (strcmp((char *)myBuffer, "cleanup\n") == 0) {
     cleanup();
     printk(KERN_INFO ">>> MODLIST: Im cleaning up the list...\n");
   } else {
-    cleanup();
     printk(KERN_INFO ">>> MODLIST: ERROR! Command %s is not valid\n", myBuffer);
   }
   
@@ -112,7 +170,11 @@ static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, lof
 
   list_for_each(pos, &myList) {
     item = list_entry(pos, struct list_item, links);
+    #ifdef PARTE_OPCIONAL
+    bufferPtr += sprintf(bufferPtr, "%s\n", item->data); // sprintf return value to myBuffer's address
+    #else
     bufferPtr += sprintf(bufferPtr, "%d\n", item->data); // sprintf return value to myBuffer's address
+    #endif
     nrBytes += sizeof(item->data) + 1; // item size + newline char
   }
         
