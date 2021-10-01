@@ -170,6 +170,10 @@ static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, lof
 
   list_for_each(pos, &myList) {
     item = list_entry(pos, struct list_item, links);
+
+    if ((nrBytes + sizeof(item->data) + 1) > BUFFER_LENGTH - 1)
+      return -ENOSPC;
+
     #ifdef PARTE_OPCIONAL
     bufferPtr += sprintf(bufferPtr, "%s\n", item->data); // sprintf return value to myBuffer's address
     #else
