@@ -39,23 +39,14 @@ static ssize_t clipboard_write(struct file *filp, const char __user *buf, size_t
 
 static ssize_t clipboard_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
   
-  int nr_bytes;
-  
-  if ((*off) > 0) /* Tell the application that there is nothing left to read */
-      return 0;
-    
-  nr_bytes=strlen(clipboard);
-    
-  if (len<nr_bytes)
-    return -ENOSPC;
-  
-    /* Transfer data from the kernel to userspace */  
-  if (copy_to_user(buf, clipboard,nr_bytes))
-    return -EINVAL;
-    
-  (*off)+=len;  /* Update the file pointer */
 
-  return nr_bytes; 
+
+  if (copy_to_user(buf, "Hello", 5))
+    return -1;
+
+  (*off)+=5;  
+
+  return 5;
 }
 
 static const struct proc_ops proc_entry_fops = {

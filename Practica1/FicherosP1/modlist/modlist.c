@@ -97,12 +97,15 @@ static ssize_t modlist_write(struct file *filp, const char __user *buf, size_t l
 
 static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
   int nrBytes = 0;
+  int lastBytes = 0;
   char myBuffer[BUFFER_LENGTH] = "";
   /* 
     Stores a pointer to the buffer. Each time the buffer is written the pointer 
     moves n bytes forward, being n the amount of bytes written to the buffer.
   */
   char *bufferPtr = myBuffer;
+
+  char tempBuf[BUFFER_LENGTH / 2] = "";
 
   struct list_item *item;
   struct list_head *pos;
@@ -113,13 +116,14 @@ static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, lof
   list_for_each(pos, &myList) {
     item = list_entry(pos, struct list_item, links);
 
-    if (nrBytes + sizeof(item->data) + 1 > BUFFER_LENGTH - 1) {
-      cleanup(); // Free all the memory
+    sprintf(tempBuf, "%d\n", item->data); 
+
+    if (nrBytes + strlen(tempBuf) > BUFFER_LENGTH - 1)
       return -ENOSPC;
-    }
     
-    bufferPtr += sprintf(bufferPtr, "%d\n", item->data); // sprintf return value to myBuffer's address
-    nrBytes += sizeof(item->data) + 1; // item size + newline char
+    lastBytes = sprintf(bufferPtr, "%d\n", item->data); // sprintf return value to myBuffer's address
+    bufferPtr += lastBytes;
+    nrBytes += lastBytes;
   }
         
   if (len < nrBytes)
