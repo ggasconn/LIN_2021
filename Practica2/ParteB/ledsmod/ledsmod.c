@@ -32,6 +32,7 @@ static inline int set_leds(struct tty_driver* handler, unsigned int mask){
 static ssize_t ledsmod_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
   char kbuff[BUFFER_LENGTH];
   unsigned int mask;
+  int ledRet;
 
   if ((*off) > 0) return 0;
 
@@ -47,8 +48,10 @@ static ssize_t ledsmod_write(struct file *filp, const char __user *buf, size_t l
   if (sscanf(kbuff, "0x%d", &mask) == 1) {
     if (mask < 0 || mask > 7)
       printk(KERN_INFO ">>>LEDSMOD: ERROR, mask is out of range. Should be within 0x0 - 0x7");
-    else
-      set_leds(kbd_driver, mask + 0x0);
+    else {
+      if ((ledRet = set_leds(kbd_driver, mask + 0x0)) != 0)
+        return ledRet;
+    }
   }
 
   (*off) += len;
