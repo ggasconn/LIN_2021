@@ -101,10 +101,6 @@ static int blink_release(struct inode *inode, struct file *file)
 
 #define BUFFER_LENGTH 100
 
-#define NR_SAMPLE_COLORS 4
-
-unsigned int sample_colors[]={0x000011, 0x110000, 0x001100, 0x000000};
-
 /* Called when a user program invokes the write() system call on the device */
 static ssize_t blink_write(struct file *file, const char *user_buffer,
 			  size_t len, loff_t *off)
@@ -113,7 +109,6 @@ static ssize_t blink_write(struct file *file, const char *user_buffer,
 	int retval = 0;
 	int i=0;
 	unsigned char* message;
-	static int color_cnt=0;
 	unsigned int color;
 
 	// NEW TYPES
@@ -123,7 +118,7 @@ static ssize_t blink_write(struct file *file, const char *user_buffer,
 	char *found;
 	int pos;
 	char testBuffer[20];
-	unsigned int myColor;
+	char pattern[10];
 
 	for (i = 0; i < NR_LEDS; i++)
 		strip[i] = 0x000000;
@@ -133,44 +128,20 @@ static ssize_t blink_write(struct file *file, const char *user_buffer,
 	
 	kbuf[len] = '\0';
 
-	while ((found = strsep(&kbufStr, ",")) != NULL) {
-		strncpy(testBuffer, found, 20);
-		printk("%s", testBuffer);
+	if (len > 0) {
+		while ((found = strsep(&kbufStr, ",")) != NULL) {
+			strncpy(testBuffer, found, 20);
 
-		if (sscanf(testBuffer, "%d:%x", &pos, &myColor) == 1) {
-			printk("%d %u", pos, myColor);
+			if (sscanf(testBuffer, "%d", &pos) == 1) {
+				sprintf(pattern, "%d:0x%%x", pos); /* Create pattern string */
 
-			if (sscanf(testBuffer, "%x", &myColor))
-				printk("%d %x", pos, myColor);
-
-			strip[pos] = myColor;
+				if (sscanf(testBuffer, pattern, &color) == 1)
+					strip[pos] = color + 0x0;
+			}
 		}
-
-		/*strncpy(testBuffer, found, 15);
-		testBuffer[sizeof(found)] = '\0';
-		printk("%s", testBuffer);
-		if (sscanf(testBuffer, "%d", &pos) == 1) {
-			printk("%d %u", pos, myColor);
-
-			if (sscanf(testBuffer, sscanfBuffer, &myColor))
-				printk("%d %u", pos, myColor);
-
-			strip[pos] = myColor;
-		}*/
 	}
 
-	for (i = 0; i < NR_LEDS; i++)
-		printk("%u\n", strip[i]);
-
-
 	message = kmalloc(NR_BYTES_BLINK_MSG,GFP_DMA);
-	
-	/* Pick a color and get ready for the next invocation*/		
-	color = sample_colors[color_cnt++];
-
-	/* Reset the color counter if necessary */	
-	if (color_cnt == NR_SAMPLE_COLORS)
-		color_cnt=0;
 	
 	/* zero fill*/
 	memset(message,0,NR_BYTES_BLINK_MSG);
@@ -178,16 +149,15 @@ static ssize_t blink_write(struct file *file, const char *user_buffer,
 	/* Fill up the message accordingly */
 	message[0]='\x05';
 	message[1]=0x00;
-	message[2]=0; 
-	message[3]=((color>>16) & 0xff);
- 	message[4]=((color>>8) & 0xff);
- 	message[5]=(color & 0xff);
 
-
-	for (i=0;i<NR_LEDS;i++){
-
+	for (i = 0; i < NR_LEDS; i++){
 		message[2]=i; /* Change Led number in message */
-	
+
+		/* Change color */
+		message[3]=((strip[i]>>16) & 0xff);
+ 		message[4]=((strip[i]>>8) & 0xff);
+ 		message[5]=(strip[i] & 0xff);
+
 		/* 
 		 * Send message (URB) to the Blinkstick device 
 		 * and wait for the operation to complete 
@@ -202,7 +172,7 @@ static ssize_t blink_write(struct file *file, const char *user_buffer,
 			 NR_BYTES_BLINK_MSG, /* message's size in bytes */
 			 0);		
 
-		if (retval<0){
+		if (retval < 0){
 			printk(KERN_ALERT "Executed with retval=%d\n",retval);
 			goto out_error;		
 		}

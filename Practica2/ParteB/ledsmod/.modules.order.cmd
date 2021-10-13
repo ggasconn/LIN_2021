@@ -1,0 +1,1 @@
+cmd_/home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/modules.order := {   echo /home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/ledsmod.ko; :; } | awk '!x[$$0]++' - > /home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/modules.order
