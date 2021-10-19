@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/LIN_2021/Practica3/FicherosP3/blinkdrvP1/modules.order := {   echo /home/kernel/Escritorio/LIN_2021/Practica3/FicherosP3/blinkdrvP1/blinkdrv.ko; :; } | awk '!x[$$0]++' - > /home/kernel/Escritorio/LIN_2021/Practica3/FicherosP3/blinkdrvP1/modules.order
