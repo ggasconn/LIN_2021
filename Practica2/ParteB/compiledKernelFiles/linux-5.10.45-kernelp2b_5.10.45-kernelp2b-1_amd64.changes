@@ -1,0 +1,33 @@
+Format: 1.8
+Date: Sun, 17 Oct 2021 20:58:25 +0200
+Source: linux-5.10.45-kernelp2b
+Binary: linux-headers-5.10.45-kernelp2b linux-image-5.10.45-kernelp2b linux-libc-dev
+Architecture: amd64
+Version: 5.10.45-kernelp2b-1
+Distribution: buster
+Urgency: low
+Maintainer: kernel <kernel@debian>
+Changed-By: kernel <kernel@debian>
+Description:
+ linux-headers-5.10.45-kernelp2b - Linux kernel headers for 5.10.45-kernelp2b on amd64
+ linux-image-5.10.45-kernelp2b - Linux kernel, version 5.10.45-kernelp2b
+ linux-libc-dev - Linux support headers for userspace development
+Changes:
+ linux-5.10.45-kernelp2b (5.10.45-kernelp2b-1) buster; urgency=low
+ .
+   * Custom built Linux kernel.
+Checksums-Sha1:
+ 7be0afd63c4268930fc2df6c73d7dc00ebf08468 4877 linux-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.buildinfo
+ 6e6ab7ea3228ca64ff003cd17c7efcda9aa24af7 8019024 linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 079b9cd9e5b978538d40b017f7f81f57fdad49ea 48350600 linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 7bcc766ac834ff7889d2c51b1282bd4d52214393 1135932 linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb
+Checksums-Sha256:
+ c8168b8fb7d6164c74ffe2ff9c434cf8fcd1c2e5dd3d566e97bcce7ad2451e36 4877 linux-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.buildinfo
+ 24b23bee998c1546aed4ffd62da2b8ebccf54e8a855d428d5a3292b7a2f3de5e 8019024 linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 83d56c231a4a2d3db83a83a6726753d761ec0ec50dfe6d242d3d998d04eafefa 48350600 linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 10e905ae2bd88c483f64d04695f2291a1b2fd58a6517e97d944ea3802b1fcbd8 1135932 linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb
+Files:
+ 81b865cf426f29a06eda6950552f8ded 4877 kernel optional linux-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.buildinfo
+ bfbbb38147fc7b1353d258de94482ce9 8019024 kernel optional linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 35d5afdd52c63d3276f611fb2050632e 48350600 kernel optional linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 0b9afc806cd3384de4c4beace4584078 1135932 devel optional linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb

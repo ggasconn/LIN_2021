@@ -1,0 +1,159 @@
+Format: 1.0
+Source: linux-5.10.45-kernelp2b
+Binary: linux-image-5.10.45-kernelp2b linux-libc-dev linux-headers-5.10.45-kernelp2b
+Architecture: amd64
+Version: 5.10.45-kernelp2b-1
+Checksums-Md5:
+ bfbbb38147fc7b1353d258de94482ce9 8019024 linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 35d5afdd52c63d3276f611fb2050632e 48350600 linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 0b9afc806cd3384de4c4beace4584078 1135932 linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb
+Checksums-Sha1:
+ 6e6ab7ea3228ca64ff003cd17c7efcda9aa24af7 8019024 linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 079b9cd9e5b978538d40b017f7f81f57fdad49ea 48350600 linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 7bcc766ac834ff7889d2c51b1282bd4d52214393 1135932 linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb
+Checksums-Sha256:
+ 24b23bee998c1546aed4ffd62da2b8ebccf54e8a855d428d5a3292b7a2f3de5e 8019024 linux-headers-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 83d56c231a4a2d3db83a83a6726753d761ec0ec50dfe6d242d3d998d04eafefa 48350600 linux-image-5.10.45-kernelp2b_5.10.45-kernelp2b-1_amd64.deb
+ 10e905ae2bd88c483f64d04695f2291a1b2fd58a6517e97d944ea3802b1fcbd8 1135932 linux-libc-dev_5.10.45-kernelp2b-1_amd64.deb
+Build-Origin: Debian
+Build-Architecture: amd64
+Build-Date: Mon, 18 Oct 2021 11:59:52 +0200
+Build-Tainted-By:
+ merged-usr-via-symlinks
+ usr-local-has-includes
+ usr-local-has-programs
+Installed-Build-Depends:
+ base-files (= 10.3+deb10u10),
+ base-passwd (= 3.5.46),
+ bash (= 5.0-4),
+ bc (= 1.07.1-2+b1),
+ binutils (= 2.31.1-16),
+ binutils-common (= 2.31.1-16),
+ binutils-x86-64-linux-gnu (= 2.31.1-16),
+ bison (= 2:3.3.2.dfsg-1),
+ bsdutils (= 1:2.33.1-0.1),
+ build-essential (= 12.6),
+ bzip2 (= 1.0.6-9.2~deb10u1),
+ coreutils (= 8.30-3),
+ cpio (= 2.12+dfsg-9),
+ cpp (= 4:8.3.0-1),
+ cpp-8 (= 8.3.0-6),
+ dash (= 0.5.10.2-5),
+ debconf (= 1.5.71),
+ debianutils (= 4.8.6.1),
+ diffutils (= 1:3.7-3),
+ dpkg (= 1.19.7),
+ dpkg-dev (= 1.19.7),
+ fdisk (= 2.33.1-0.1),
+ findutils (= 4.6.0+git+20190209-2),
+ flex (= 2.6.4-6.2),
+ g++ (= 4:8.3.0-1),
+ g++-8 (= 8.3.0-6),
+ gcc (= 4:8.3.0-1),
+ gcc-8 (= 8.3.0-6),
+ gcc-8-base (= 8.3.0-6),
+ grep (= 3.3-1),
+ gzip (= 1.9-3),
+ hostname (= 3.21),
+ init-system-helpers (= 1.56+nmu1),
+ kmod (= 26-1),
+ libacl1 (= 2.2.53-4),
+ libasan5 (= 8.3.0-6),
+ libatomic1 (= 8.3.0-6),
+ libattr1 (= 1:2.4.48-4),
+ libaudit-common (= 1:2.8.4-3),
+ libaudit1 (= 1:2.8.4-3),
+ libbinutils (= 2.31.1-16),
+ libbison-dev (= 2:3.3.2.dfsg-1),
+ libblkid1 (= 2.33.1-0.1),
+ libbz2-1.0 (= 1.0.6-9.2~deb10u1),
+ libc-bin (= 2.28-10),
+ libc-dev-bin (= 2.28-10),
+ libc6 (= 2.28-10),
+ libc6-dev (= 2.28-10),
+ libcap-ng0 (= 0.7.9-2),
+ libcc1-0 (= 8.3.0-6),
+ libdb5.3 (= 5.3.28+dfsg1-0.5),
+ libdebconfclient0 (= 0.249),
+ libdpkg-perl (= 1.19.7),
+ libelf-dev (= 0.176-1.1),
+ libelf1 (= 0.176-1.1),
+ libfdisk1 (= 2.33.1-0.1),
+ libgcc-8-dev (= 8.3.0-6),
+ libgcc1 (= 1:8.3.0-6),
+ libgcrypt20 (= 1.8.4-5+deb10u1),
+ libgdbm-compat4 (= 1.18.1-4),
+ libgdbm6 (= 1.18.1-4),
+ libgmp10 (= 2:6.1.2+dfsg-4),
+ libgomp1 (= 8.3.0-6),
+ libgpg-error0 (= 1.35-1),
+ libisl19 (= 0.20-2),
+ libitm1 (= 8.3.0-6),
+ libkmod2 (= 26-1),
+ liblsan0 (= 8.3.0-6),
+ liblz4-1 (= 1.8.3-1+deb10u1),
+ liblzma5 (= 5.2.4-1),
+ libmount1 (= 2.33.1-0.1),
+ libmpc3 (= 1.1.0-1),
+ libmpfr6 (= 4.0.2-1),
+ libmpx2 (= 8.3.0-6),
+ libncurses6 (= 6.1+20181013-2+deb10u2),
+ libncursesw6 (= 6.1+20181013-2+deb10u2),
+ libpam-modules (= 1.3.1-5),
+ libpam-modules-bin (= 1.3.1-5),
+ libpam-runtime (= 1.3.1-5),
+ libpam0g (= 1.3.1-5),
+ libpcre3 (= 2:8.39-12),
+ libperl5.28 (= 5.28.1-6+deb10u1),
+ libpopt0 (= 1.16-12),
+ libquadmath0 (= 8.3.0-6),
+ libreadline7 (= 7.0-5),
+ libselinux1 (= 2.8-1+b1),
+ libsigsegv2 (= 2.12-2),
+ libsmartcols1 (= 2.33.1-0.1),
+ libssl-dev (= 1.1.1d-0+deb10u6),
+ libssl1.1 (= 1.1.1d-0+deb10u6),
+ libstdc++-8-dev (= 8.3.0-6),
+ libstdc++6 (= 8.3.0-6),
+ libsystemd0 (= 241-7~deb10u7),
+ libtinfo6 (= 6.1+20181013-2+deb10u2),
+ libtsan0 (= 8.3.0-6),
+ libubsan1 (= 8.3.0-6),
+ libudev1 (= 241-7~deb10u7),
+ libuuid1 (= 2.33.1-0.1),
+ linux-libc-dev (= 4.19.194-2),
+ login (= 1:4.5-1.1),
+ lsb-base (= 10.2019051400),
+ m4 (= 1.4.18-2),
+ make (= 4.2.1-1.2),
+ mawk (= 1.3.3-17+b3),
+ ncurses-base (= 6.1+20181013-2+deb10u2),
+ ncurses-bin (= 6.1+20181013-2+deb10u2),
+ patch (= 2.7.6-3+deb10u1),
+ perl (= 5.28.1-6+deb10u1),
+ perl-base (= 5.28.1-6+deb10u1),
+ perl-modules-5.28 (= 5.28.1-6+deb10u1),
+ readline-common (= 7.0-5),
+ rsync (= 3.1.3-6),
+ sed (= 4.7-1),
+ sysvinit-utils (= 2.93-8),
+ tar (= 1.30+dfsg-6),
+ util-linux (= 2.33.1-0.1),
+ xz-utils (= 5.2.4-1),
+ zlib1g (= 1:1.2.11.dfsg-1),
+ zlib1g-dev (= 1:1.2.11.dfsg-1)
+Environment:
+ AR="ar"
+ AWK="awk"
+ CC="gcc"
+ CPP="gcc -E"
+ DEB_BUILD_OPTIONS="parallel=2"
+ LANG="es_ES.UTF-8"
+ LC_COLLATE="C"
+ LC_NUMERIC="C"
+ LD="ld"
+ LEX="flex"
+ MAKE="make"
+ MAKEFLAGS="rR -j1 --no-print-directory -- LOCALVERSION=-kernelp2b"
+ SOURCE_DATE_EPOCH="1634497105"
+ YACC="bison"

@@ -16,15 +16,17 @@ int main(int argc, char**argv) {
 	int retCode;
 
 	if (argc != 2) {
-		printf(">>> ERROR! Invalid parameter number!\n");
+		printf(">>> ERROR! Invalid argument number! Usage: %s [0x0-0x7]\n", argv[0]);
 		return -1;
 	}
 
-	if (sscanf(argv[1], "0x%d", &mask) == 1)
+	if (sscanf(argv[1], "0x%d", &mask) == 1) {
 		if ((retCode = lin_ledctl(mask)) != 0) {
 			fprintf(stderr, "%s\n", strerror(errno));
 			return retCode;
 		}
+	} else
+		printf(">>> Cannot find a valid hex number! Please use 0x0 - 0x7 range\n");
 
 	return 0;
 }
