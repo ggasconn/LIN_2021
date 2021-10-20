@@ -20,7 +20,7 @@ int main(int argc, char**argv) {
 		return -1;
 	}
 
-	if (sscanf(argv[1], "0x%d", &mask) == 1) {
+	if (sscanf(argv[1], "%X", &mask) == 1) {
 		if ((retCode = lin_ledctl(mask)) != 0) {
 			fprintf(stderr, "%s\n", strerror(errno));
 			return retCode;
