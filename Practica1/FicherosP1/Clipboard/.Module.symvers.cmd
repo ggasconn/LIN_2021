@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/Clipboard/Module.symvers := sed 's/ko$$/o/' /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/Clipboard/modules.order | scripts/mod/modpost -m    -o /home/kernel/Escritorio/LIN_2021/Practica1/FicherosP1/Clipboard/Module.symvers -e -i Module.symvers   -T -
