@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP4/ProdCons1/modules.order := {   echo /home/kernel/Escritorio/FicherosP4/ProdCons1/prodcons1.ko; :; } | awk '!x[$$0]++' - > /home/kernel/Escritorio/FicherosP4/ProdCons1/modules.order

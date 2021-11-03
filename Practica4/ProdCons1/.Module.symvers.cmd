@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP4/ProdCons1/Module.symvers := sed 's/ko$$/o/' /home/kernel/Escritorio/FicherosP4/ProdCons1/modules.order | scripts/mod/modpost -m    -o /home/kernel/Escritorio/FicherosP4/ProdCons1/Module.symvers -e -i Module.symvers   -T -

@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP4/ProdCons1/prodcons1.mod := { echo  /home/kernel/Escritorio/FicherosP4/ProdCons1/prodcons1.o;  echo; } > /home/kernel/Escritorio/FicherosP4/ProdCons1/prodcons1.mod
