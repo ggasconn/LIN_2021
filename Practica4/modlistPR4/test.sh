@@ -1,48 +1,13 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]; then
-	echo -e "ERROR! Script should be run as root!"
-	exit -1
-fi
+###
+# Expected behavior:
+# Executed on a non SMP-safe enviroment the kernel should terminate the script
+# due to a null pointer or bad address error
+###
 
-make
-
-#insmod modlist.ko
-#if [ $? -ne 0 ]; then
-#	echo -e "Error loading modlist module!"
-#	exit -1
-#fi
-
-cat /proc/modlist 
-echo -e "\n"
-
-echo add 10 > /proc/modlist
-
-cat /proc/modlist 
-echo -e "\n"
-
-echo add 4 > /proc/modlist
-echo add 4 > /proc/modlist
-
-cat /proc/modlist 
-echo -e "\n"
-
-echo add 2 > /proc/modlist
-echo add 5 > /proc/modlist
-
-cat /proc/modlist 
-echo -e "\n"
-
-echo remove 4 > /proc/modlist 
-
-cat /proc/modlist 
-echo -e "\n"
-
-echo cleanup > /proc/modlist 
-
-cat /proc/modlist
-echo -e "\n"
-
-rmmod modlist
-
-make clean
+while (true); do
+	echo add 1 > /proc/modlist
+	cat /proc/modlist
+	echo remove 1 > /proc/modlist
+done
