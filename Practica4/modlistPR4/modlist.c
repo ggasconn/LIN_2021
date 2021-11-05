@@ -128,8 +128,10 @@ static ssize_t modlist_read(struct file *filp, char __user *buf, size_t len, lof
 
     sprintf(tempBuf, "%d\n", item->data); 
 
-    if (nrBytes + strlen(tempBuf) > BUFFER_LENGTH - 1)
+    if (nrBytes + strlen(tempBuf) > BUFFER_LENGTH - 1) {
+      spin_unlock(&spinLock);
       return -ENOSPC;
+    }
     
     lastBytes = sprintf(bufferPtr, "%d\n", item->data); // sprintf return value to myBuffer's address
     bufferPtr += lastBytes;
