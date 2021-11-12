@@ -27,8 +27,14 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
         return -EINTR;
 
     if(file->f_mode & FMODE_READ){
-        cons_count++;
-        
+		cons_count++;
+
+        /* Por si hay algún productor bloqueado */
+		if (nr_prod_waiting > 0){	
+			up(&sem_prod);
+			nr_prod_waiting--;
+		}
+
         while(prod_count<1) {
             nr_cons_waiting++;
             up(&sem_mtx); // "Libera" el mutex
@@ -42,12 +48,19 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             }
 
             // "Adquiere" el mutex 
-            if (down_interruptible(&sem_mtx))
+            if (down_interruptible(&sem_mtx)) {
+                nr_cons_waiting--;
                 return -EINTR;
+            }
         }      
     }else{
         prod_count++;
-            
+
+        if (nr_cons_waiting > 0){
+			up(&sem_cons);
+			nr_cons_waiting--;
+		}
+
         while(cons_count<1) {
             nr_prod_waiting++;
             up(&sem_mtx); // "Libera" el mutex
@@ -61,8 +74,10 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             }
 
             // "Adquiere" el mutex 
-            if (down_interruptible(&sem_mtx))
+            if (down_interruptible(&sem_mtx)) {
+                nr_prod_waiting--;
                 return -EINTR;
+            }
         }
     }
     up(&sem_mtx);
