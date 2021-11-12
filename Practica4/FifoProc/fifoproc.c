@@ -91,8 +91,8 @@ static ssize_t fifoproc_write(struct file *filp, const char __user *buff, size_t
     if (len> MAX_CBUFFER_LEN || len> MAX_KBUF) { return -ENOSPC;}
     if (copy_from_user(kbuffer,buff,len)) { return -EFAULT;}
 
-    kbuffer[len] = '\0';
-    *off+=len;
+    //kbuffer[len] = '\0';
+    //*off+=len;
 
      if(down_interruptible(&sem_mtx))
         return -EINTR;
@@ -131,9 +131,6 @@ static ssize_t fifoproc_write(struct file *filp, const char __user *buff, size_t
 
 static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, loff_t *off) {
     char kbuffer[MAX_KBUF];
-    int nr_bytes=0;
-    int bytes_extracted;
-    int val;
     
 
     //if (len> MAX_CBUFFER_LEN || len> MAX_KBUF) { return -ENOSPC;}
@@ -168,7 +165,7 @@ static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, l
     }
     up(&sem_mtx);
 
-    if (copy_to_user(buff,kbuffer,nr_bytes)) { return -EFAULT;}
+    if (copy_to_user(buff,kbuffer,len)) { return -EFAULT;}
 
     return len;
 }
