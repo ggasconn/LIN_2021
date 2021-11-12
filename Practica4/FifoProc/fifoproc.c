@@ -169,9 +169,11 @@ static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, l
     }
     up(&sem_mtx);
 
+    /* 
     if (bytes_extracted!=sizeof(int))
         return -EINVAL;
-    
+    */
+   
     nr_bytes = sprintf(kbuffer, "%i\n", val);
 
     if(len < nr_bytes)
