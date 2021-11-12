@@ -110,8 +110,10 @@ static ssize_t fifoproc_write(struct file *filp, const char __user *buff, size_t
         }
 
         // "Adquiere" el mutex 
-        if (down_interruptible(&sem_mtx))
+        if (down_interruptible(&sem_mtx)) {
+            nr_prod_waiting--;
             return -EINTR;
+        }
     }
 
     /* Detectar fin de comunicación por error (consumidor cierra FIFO antes) */
@@ -132,14 +134,11 @@ static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, l
     int nr_bytes=0;
     int bytes_extracted;
     int val;
-
-    if ((*off)>0)
-        return 0;
     
 
-    if (len> MAX_CBUFFER_LEN || len> MAX_KBUF) { return -ENOSPC;}
+    //if (len> MAX_CBUFFER_LEN || len> MAX_KBUF) { return -ENOSPC;}
 
-     if(down_interruptible(&sem_mtx))
+    if (down_interruptible(&sem_mtx))
         return -EINTR;
     
     while(kfifo_len(&cbuffer)<len && prod_count>0) {
@@ -161,7 +160,7 @@ static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, l
     
     if (prod_count==0 && kfifo_is_empty(&cbuffer)) {up(&sem_mtx); return 0;}
 
-    bytes_extracted = kfifo_out(&cbuffer,kbuffer,len);
+    kfifo_out(&cbuffer,kbuffer,len);
 
     if (nr_prod_waiting>0) {
         up(&sem_prod);
@@ -169,21 +168,9 @@ static ssize_t fifoproc_read(struct file *filp, char __user *buff, size_t len, l
     }
     up(&sem_mtx);
 
-    /* 
-    if (bytes_extracted!=sizeof(int))
-        return -EINVAL;
-    */
-   
-    nr_bytes = sprintf(kbuffer, "%i\n", val);
-
-    if(len < nr_bytes)
-        return -ENOSPC;
-
     if (copy_to_user(buff,kbuffer,nr_bytes)) { return -EFAULT;}
 
-    ((*off))+=nr_bytes;
-
-    return nr_bytes;
+    return len;
 }
 
 static int fifoproc_release(struct inode *inode, struct file *file) {
@@ -194,17 +181,21 @@ static int fifoproc_release(struct inode *inode, struct file *file) {
         cons_count--;
         
         if (nr_prod_waiting>0) {
-            up(&sem_prod);
             nr_prod_waiting--;
+            up(&sem_prod);
         }
     }else{
         prod_count--;
+        
         if (nr_cons_waiting>0) {
-            up(&sem_cons);
             nr_cons_waiting--;
+            up(&sem_cons);
         }
     }
-    kfifo_reset(&cbuffer);
+
+    if (cons_count == 0 && prod_count == 0)
+        kfifo_reset(&cbuffer);
+    
     up(&sem_mtx);
 
     return 0;
