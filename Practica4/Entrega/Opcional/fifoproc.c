@@ -1,17 +1,17 @@
-
 #include <linux/string.h>
 #include <asm-generic/errno.h>
 #include <linux/kfifo.h>
 #include <linux/module.h>
 #include <linux/semaphore.h>
 #include <linux/uaccess.h>
-#include <linux/proc_fs.h>
 #include <linux/kernel.h>
+#include <linux/cdev.h> /* Char device related methods */
  
 
 #define MAX_KBUF 64
 #define MAX_CBUFFER_LEN 64
 
+#define DEVICE_NAME "fifopipe"
 
 struct semaphore sem_mtx;
 struct semaphore sem_prod;
@@ -20,7 +20,9 @@ struct kfifo cbuffer;
 int prod_count = 0, cons_count = 0;
 int nr_prod_waiting = 0, nr_cons_waiting = 0;
 
-static struct proc_dir_entry *proc_entry;
+/* Declare a new range of numbers and a new char device */
+dev_t deviceRegister;
+struct cdev *device = NULL;
 
 static int fifoproc_open(struct inode *inode, struct file *file) {
     
@@ -200,24 +202,28 @@ static int fifoproc_release(struct inode *inode, struct file *file) {
     return 0;
 }
 
-static const struct proc_ops proc_entry_fops =
+/* Removed proc_ from method names as it's no longer a /proc entry */
+static const struct file_operations fops =
 {
-    .proc_read = fifoproc_read,
-    .proc_write = fifoproc_write,
-    .proc_open = fifoproc_open,
-    .proc_release = fifoproc_release
+    .read = fifoproc_read,
+    .write = fifoproc_write,
+    .open = fifoproc_open,
+    .release = fifoproc_release
 };
 
 int fifo_init_module( void ) {
    
     int ret = 0;
 
-    proc_entry = proc_create( "fifoproc", 0666, NULL, &proc_entry_fops);
+    /* Try to register a range of char device numbers */
+    if (alloc_chrdev_region(&deviceRegister, 0, 1, DEVICE_NAME) < 0) return -ENOMEM;
+    if ((device = cdev_alloc()) == NULL) return -ENOMEM;
 
-    if (proc_entry == NULL) {
-        ret = -ENOMEM;
-        printk(KERN_INFO ">>> FIFOPROC: ERROR! Can't create /proc entry\n");
-    }
+    cdev_init(device, &fops); /* Init device with associated ops */
+
+    if (cdev_add(device, deviceRegister, 1)) return -ENOMEM; /* Register new device */
+
+    printk(KERN_INFO "Char device created with major %d and minor %d, can be used with name %s", MAJOR(deviceRegister), MINOR(deviceRegister), DEVICE_NAME);
 
     ret = kfifo_alloc(&cbuffer, MAX_CBUFFER_LEN, GFP_KERNEL);
     if (ret) return -ENOMEM;
@@ -235,7 +241,13 @@ int fifo_init_module( void ) {
 
 
 void fifo_cleanup_module( void ) {
-	remove_proc_entry("fifoproc", NULL);
+    
+    /* Unregister device and numbers if device was created */
+    if (device) {
+        cdev_del(device);
+        unregister_chrdev_region(deviceRegister, 1);
+    }
+
 	kfifo_free(&cbuffer);
 	printk(KERN_INFO "fifoproc: Modulo descargado.\n");
 }
