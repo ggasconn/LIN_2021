@@ -46,6 +46,7 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             if (down_interruptible(&sem_cons)) {
                 down(&sem_mtx);
                 nr_cons_waiting--;
+                cons_count--;
                 up(&sem_mtx);
                 return -EINTR;
             }
@@ -72,6 +73,7 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             if (down_interruptible(&sem_prod)) {
                 down(&sem_mtx);
                 nr_prod_waiting--;
+                prod_count--;
                 up(&sem_mtx);
                 return -EINTR;
             }
@@ -223,7 +225,7 @@ int fifo_init_module( void ) {
 
     if (cdev_add(device, deviceRegister, 1)) return -ENOMEM; /* Register new device */
 
-    printk(KERN_INFO "Char device created with major %d and minor %d, can be used with name %s", MAJOR(deviceRegister), MINOR(deviceRegister), DEVICE_NAME);
+    printk(KERN_INFO ">>> FIFOPROC: Char device created with major %d and minor %d, can be used with name %s", MAJOR(deviceRegister), MINOR(deviceRegister), DEVICE_NAME);
 
     ret = kfifo_alloc(&cbuffer, MAX_CBUFFER_LEN, GFP_KERNEL);
     if (ret) return -ENOMEM;
@@ -249,7 +251,7 @@ void fifo_cleanup_module( void ) {
     }
 
 	kfifo_free(&cbuffer);
-	printk(KERN_INFO "fifoproc: Modulo descargado.\n");
+	printk(KERN_INFO ">>> FIFOPROC: Module unloaded.\n");
 }
 
 

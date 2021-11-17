@@ -7,12 +7,16 @@ void fifoproc_open(bool openRead) {
     lock(mtx);
     if (openRead == 1){
         cons_count++;
+
+        cond_signal(prod);
             
         while (prod_count < 1)
             cond_wait(cons, mtx);
     }else {
         prod_count++;
             
+        cond_signal(cons);
+        
         while (cons_count < 1)
             cond_wait(prod, mtx);
     }

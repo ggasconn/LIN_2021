@@ -44,6 +44,7 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             if (down_interruptible(&sem_cons)) {
                 down(&sem_mtx);
                 nr_cons_waiting--;
+		        cons_count--;
                 up(&sem_mtx);
                 return -EINTR;
             }
@@ -70,6 +71,7 @@ static int fifoproc_open(struct inode *inode, struct file *file) {
             if (down_interruptible(&sem_prod)) {
                 down(&sem_mtx);
                 nr_prod_waiting--;
+		        prod_count--;
                 up(&sem_mtx);
                 return -EINTR;
             }
@@ -237,7 +239,7 @@ int fifo_init_module( void ) {
 void fifo_cleanup_module( void ) {
 	remove_proc_entry("fifoproc", NULL);
 	kfifo_free(&cbuffer);
-	printk(KERN_INFO "fifoproc: Modulo descargado.\n");
+	printk(KERN_INFO ">>> FIFOPROC: Module unloaded\n");
 }
 
 
