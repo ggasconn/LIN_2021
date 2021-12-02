@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/modules.order := {   echo /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue1.ko;   echo /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue2.ko;   echo /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue3.ko; :; } | awk '!x[$$0]++' - > /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/modules.order

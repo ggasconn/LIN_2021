@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/Module.symvers := sed 's/ko$$/o/' /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/modules.order | scripts/mod/modpost -m    -o /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/Module.symvers -e -i Module.symvers   -T -
