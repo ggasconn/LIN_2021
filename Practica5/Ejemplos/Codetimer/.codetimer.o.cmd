@@ -973,6 +973,16 @@ deps_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o :
     $(wildcard include/config/kasan/vmalloc.h) \
   arch/x86/include/asm/vmalloc.h \
   arch/x86/include/asm/pgtable_areas.h \
+  include/linux/slab.h \
+    $(wildcard include/config/debug/slab.h) \
+    $(wildcard include/config/failslab.h) \
+    $(wildcard include/config/have/hardened/usercopy/allocator.h) \
+    $(wildcard include/config/slab.h) \
+    $(wildcard include/config/slub.h) \
+    $(wildcard include/config/slob.h) \
+  include/linux/kasan.h \
+    $(wildcard include/config/kasan/generic.h) \
+    $(wildcard include/config/kasan/inline.h) \
 
 /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o: $(deps_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o)
 
