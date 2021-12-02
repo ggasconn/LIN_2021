@@ -1,0 +1,1 @@
+cmd_/home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/ledsmod.ko := ld -r -m elf_x86_64  --build-id=sha1  -T scripts/module.lds -o /home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/ledsmod.ko /home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/ledsmod.o /home/kernel/Escritorio/LIN_2021/Practica2/ParteB/ledsmod/ledsmod.mod.o;  true
