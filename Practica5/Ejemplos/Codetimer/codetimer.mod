@@ -1,2 +1,2 @@
-/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o
+/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o
 

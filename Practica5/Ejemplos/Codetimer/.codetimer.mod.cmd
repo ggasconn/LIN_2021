@@ -1,1 +1,1 @@
-cmd_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.mod := { echo  /home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o;  echo; } > /home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.mod
+cmd_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.mod := { echo  /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o;  echo; } > /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.mod

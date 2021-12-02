@@ -1,8 +1,8 @@
-cmd_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o := gcc -Wp,-MMD,/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/.codetimer.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/8/include -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -include ./include/linux/compiler_types.h -D__KERNEL__ -fmacro-prefix-map=./= -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Wno-format-security -std=gnu89 -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -fcf-protection=none -m64 -falign-jumps=1 -falign-loops=1 -mno-80387 -mno-fp-ret-in-387 -mpreferred-stack-boundary=3 -mskip-rax-setup -mtune=generic -mno-red-zone -mcmodel=kernel -DCONFIG_X86_X32_ABI -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -fno-jump-tables -fno-delete-null-pointer-checks -Wno-frame-address -Wno-format-truncation -Wno-format-overflow -O2 --param=allow-store-data-races=0 -Wframe-larger-than=2048 -fstack-protector-strong -Wimplicit-fallthrough -Wno-unused-but-set-variable -Wno-unused-const-variable -pg -mrecord-mcount -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop-truncation -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-stack-check -fconserve-stack -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -Wno-packed-not-aligned  -DMODULE  -DKBUILD_BASENAME='"codetimer"' -DKBUILD_MODNAME='"codetimer"' -c -o /home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o /home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.c
+cmd_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o := gcc -Wp,-MMD,/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/.codetimer.o.d  -nostdinc -isystem /usr/lib/gcc/x86_64-linux-gnu/8/include -I./arch/x86/include -I./arch/x86/include/generated  -I./include -I./arch/x86/include/uapi -I./arch/x86/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -include ./include/linux/compiler_types.h -D__KERNEL__ -fmacro-prefix-map=./= -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Wno-format-security -std=gnu89 -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -fcf-protection=none -m64 -falign-jumps=1 -falign-loops=1 -mno-80387 -mno-fp-ret-in-387 -mpreferred-stack-boundary=3 -mskip-rax-setup -mtune=generic -mno-red-zone -mcmodel=kernel -DCONFIG_X86_X32_ABI -Wno-sign-compare -fno-asynchronous-unwind-tables -mindirect-branch=thunk-extern -mindirect-branch-register -fno-jump-tables -fno-delete-null-pointer-checks -Wno-frame-address -Wno-format-truncation -Wno-format-overflow -O2 --param=allow-store-data-races=0 -Wframe-larger-than=2048 -fstack-protector-strong -Wimplicit-fallthrough -Wno-unused-but-set-variable -Wno-unused-const-variable -g -pg -mrecord-mcount -mfentry -DCC_USING_FENTRY -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop-truncation -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-stack-check -fconserve-stack -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -Wno-packed-not-aligned  -DMODULE  -DKBUILD_BASENAME='"codetimer"' -DKBUILD_MODNAME='"codetimer"' -c -o /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.c
 
-source_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o := /home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.c
+source_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o := /home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.c
 
-deps_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o := \
+deps_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o := \
   include/linux/kconfig.h \
     $(wildcard include/config/cc/version/text.h) \
     $(wildcard include/config/cpu/big/endian.h) \
@@ -870,7 +870,110 @@ deps_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o := \
   include/uapi/linux/irqnr.h \
   include/linux/prandom.h \
   arch/x86/include/asm/archrandom.h \
+  include/linux/kfifo.h \
+  include/linux/scatterlist.h \
+    $(wildcard include/config/need/sg/dma/length.h) \
+    $(wildcard include/config/debug/sg.h) \
+    $(wildcard include/config/sgl/alloc.h) \
+    $(wildcard include/config/arch/no/sg/chain.h) \
+    $(wildcard include/config/sg/pool.h) \
+  include/linux/mm.h \
+    $(wildcard include/config/have/arch/mmap/rnd/bits.h) \
+    $(wildcard include/config/have/arch/mmap/rnd/compat/bits.h) \
+    $(wildcard include/config/arch/uses/high/vma/flags.h) \
+    $(wildcard include/config/arch/has/pkeys.h) \
+    $(wildcard include/config/ppc.h) \
+    $(wildcard include/config/parisc.h) \
+    $(wildcard include/config/sparc64.h) \
+    $(wildcard include/config/arm64/mte.h) \
+    $(wildcard include/config/shmem.h) \
+    $(wildcard include/config/dev/pagemap/ops.h) \
+    $(wildcard include/config/device/private.h) \
+    $(wildcard include/config/pci/p2pdma.h) \
+    $(wildcard include/config/arch/has/pte/special.h) \
+    $(wildcard include/config/arch/has/pte/devmap.h) \
+    $(wildcard include/config/debug/vm/rb.h) \
+    $(wildcard include/config/page/poisoning.h) \
+    $(wildcard include/config/init/on/alloc/default/on.h) \
+    $(wildcard include/config/init/on/free/default/on.h) \
+    $(wildcard include/config/debug/pagealloc.h) \
+    $(wildcard include/config/arch/has/set/direct/map.h) \
+    $(wildcard include/config/hibernation.h) \
+    $(wildcard include/config/hugetlbfs.h) \
+    $(wildcard include/config/mapping/dirty/helpers.h) \
+  include/linux/mmap_lock.h \
+  include/linux/percpu-refcount.h \
+  include/linux/page_ext.h \
+  include/linux/stacktrace.h \
+    $(wildcard include/config/stacktrace.h) \
+    $(wildcard include/config/arch/stackwalk.h) \
+    $(wildcard include/config/have/reliable/stacktrace.h) \
+  include/linux/stackdepot.h \
+  include/linux/page_ref.h \
+    $(wildcard include/config/debug/page/ref.h) \
+  include/linux/memremap.h \
+  include/linux/ioport.h \
+    $(wildcard include/config/io/strict/devmem.h) \
+  include/linux/overflow.h \
+  include/linux/sizes.h \
+  include/linux/pgtable.h \
+    $(wildcard include/config/highpte.h) \
+    $(wildcard include/config/have/arch/transparent/hugepage/pud.h) \
+    $(wildcard include/config/have/arch/soft/dirty.h) \
+    $(wildcard include/config/arch/enable/thp/migration.h) \
+    $(wildcard include/config/have/arch/huge/vmap.h) \
+    $(wildcard include/config/x86/espfix64.h) \
+  arch/x86/include/asm/pgtable.h \
+    $(wildcard include/config/debug/wx.h) \
+  arch/x86/include/asm/fpu/xstate.h \
+  arch/x86/include/asm/fpu/api.h \
+    $(wildcard include/config/x86/debug/fpu.h) \
+  include/asm-generic/pgtable_uffd.h \
+  arch/x86/include/asm/pgtable_64.h \
+  arch/x86/include/asm/fixmap.h \
+    $(wildcard include/config/provide/ohci1394/dma/init.h) \
+    $(wildcard include/config/x86/io/apic.h) \
+    $(wildcard include/config/pci/mmconfig.h) \
+    $(wildcard include/config/x86/intel/mid.h) \
+    $(wildcard include/config/acpi/apei/ghes.h) \
+    $(wildcard include/config/intel/txt.h) \
+  arch/x86/include/uapi/asm/vsyscall.h \
+  include/asm-generic/fixmap.h \
+  arch/x86/include/asm/pgtable-invert.h \
+  include/linux/huge_mm.h \
+  include/linux/sched/coredump.h \
+    $(wildcard include/config/core/dump/default/elf/headers.h) \
+  include/linux/vmstat.h \
+    $(wildcard include/config/vm/event/counters.h) \
+    $(wildcard include/config/debug/tlbflush.h) \
+    $(wildcard include/config/debug/vm/vmacache.h) \
+  include/linux/vm_event_item.h \
+    $(wildcard include/config/memory/balloon.h) \
+    $(wildcard include/config/balloon/compaction.h) \
+  arch/x86/include/asm/io.h \
+    $(wildcard include/config/mtrr.h) \
+    $(wildcard include/config/x86/pat.h) \
+  arch/x86/include/generated/asm/early_ioremap.h \
+  include/asm-generic/early_ioremap.h \
+    $(wildcard include/config/generic/early/ioremap.h) \
+  include/asm-generic/iomap.h \
+    $(wildcard include/config/has/ioport/map.h) \
+    $(wildcard include/config/pci.h) \
+    $(wildcard include/config/generic/iomap.h) \
+  include/asm-generic/pci_iomap.h \
+    $(wildcard include/config/no/generic/pci/ioport/map.h) \
+    $(wildcard include/config/generic/pci/iomap.h) \
+  include/asm-generic/io.h \
+    $(wildcard include/config/generic/ioremap.h) \
+    $(wildcard include/config/virt/to/bus.h) \
+  include/linux/logic_pio.h \
+    $(wildcard include/config/indirect/pio.h) \
+  include/linux/fwnode.h \
+  include/linux/vmalloc.h \
+    $(wildcard include/config/kasan/vmalloc.h) \
+  arch/x86/include/asm/vmalloc.h \
+  arch/x86/include/asm/pgtable_areas.h \
 
-/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o: $(deps_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o)
+/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o: $(deps_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o)
 
-$(deps_/home/kernel/Escritorio/FicherosP5/Ejemplos/Codetimer/codetimer.o):
+$(deps_/home/kernel/Escritorio/LIN_2021/Practica5/Ejemplos/Codetimer/codetimer.o):
