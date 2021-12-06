@@ -23,6 +23,7 @@ struct timer_list my_timer; /* Structure that describes the kernel timer */
 
 /* /proc entry data */
 static struct proc_dir_entry *conf_entry;
+static struct proc_dir_entry *consumer_entry;
 
 /* Workqueue data */
 static struct workqueue_struct *emptyBufferWQ;
@@ -71,7 +72,41 @@ void cleanList(void) {
     } 
 }
 
-static void copyValues(struct work_struct *work) { /* TODO */ }
+static void copyValues(struct work_struct *work) {
+    unsigned long bufferFlags;
+    unsigned int codes = 0;
+    char tempBuffer[BUFFER_SIZE] = "";
+    
+    struct list_item *item = NULL;
+
+    spin_lock_irqsave(&bufferSpinLock, bufferFlags);
+
+    while (!kfifo_is_empty(&cbuf)) {
+        kfifo_out(&cbuf, tempBuffer, strlen(code_format));
+        codes++;
+        printk(KERN_INFO ">>> CODETIMER: Extracted %s form cbuf", tempBuffer);
+    }
+
+    kfifo_reset(&cbuf);
+
+    spin_unlock_irqrestore(&bufferSpinLock, bufferFlags);
+
+    while (codes) {
+        printk(KERN_INFO ">>> CODETIMER: %s", tempBuffer);
+    }
+    
+    /*
+    while (codes) {
+        item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
+
+        s = (char *)vmalloc(strlen(str));
+        memcpy(s, str, strlen(str));
+        item->data = s;
+
+        list_add_tail(&item->links, &myList); // Add node to the end of the list
+    }
+    */
+}
 
 /* Function invoked when timer expires (fires) */
 static void fire_timer(struct timer_list *timer) {
@@ -185,6 +220,30 @@ static const struct proc_ops conf_entry_fops = {
     .proc_write = config_write,
 };
 
+
+static int consumer_open(struct inode *inode, struct file *file) {
+    try_module_get(THIS_MODULE);
+    return 0;
+}
+
+static int consumer_release(struct inode *inode, struct file *file) {
+    module_put(THIS_MODULE);
+    return 0;
+}
+
+static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
+    // TODO
+    return 0;
+}
+
+
+static const struct proc_ops consumer_entry_fops = {
+    .proc_read = consumer_read,
+    .proc_open = consumer_open,
+    .proc_release = consumer_release,
+};
+
+
 int init_timer_module( void ) {
     int retval = 0;
 
@@ -194,10 +253,12 @@ int init_timer_module( void ) {
         return -ENOMEM;
     
     conf_entry = proc_create("codeconfig", 0666, NULL, &conf_entry_fops);
-    if (conf_entry == NULL)
+    consumer_entry = proc_create("codetimer", 0666, NULL, &consumer_entry_fops);
+
+    if (conf_entry == NULL || consumer_entry == NULL)
         return -ENOMEM;
     
-    printk(">>> CODETIMER: /proc/codeconfig entry exported successfully");
+    printk(">>> CODETIMER: /proc entries exported successfully");
 
     spin_lock_init(&bufferSpinLock);
 
@@ -231,6 +292,7 @@ void cleanup_timer_module( void ) {
 
     /* Delete /proc entry */
     remove_proc_entry("codeconfig", NULL);
+    remove_proc_entry("codetimer", NULL);
 
     /* Wait until completion of the timer function (if it's currently running) and delete timer */
     del_timer_sync(&my_timer);
