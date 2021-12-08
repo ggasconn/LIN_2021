@@ -9,6 +9,7 @@
 #include <linux/workqueue.h>
 #include <linux/slab.h>
 #include <linux/list.h>
+#include <linux/semaphore.h>
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Codetimer Module");
@@ -29,7 +30,9 @@ static struct proc_dir_entry *consumer_entry;
 static struct workqueue_struct *emptyBufferWQ;
 struct work_struct copyValuesWork;
 
+/* Syncro */
 DEFINE_SPINLOCK(bufferSpinLock);
+struct semaphore sem_mtx;
 
 /* Double linked list data */
 struct list_head myList;
@@ -57,10 +60,13 @@ void noinline trace_timer_msg(char* c){
 
 
 /* START OF THE ACTUAL CODE */
-void cleanList(void) {
+int cleanList(void) {
     struct list_head *pos = NULL;
     struct list_head *aux = NULL;
     struct list_item *item = NULL;
+
+    if (down_interruptible(&sem_mtx))
+        return -EINTR;
 
     list_for_each_safe(pos, aux, &myList) {
         // Retrieve node from list to later delete it and free its memory
@@ -69,43 +75,56 @@ void cleanList(void) {
         
         vfree(item->data);
         vfree(item); // Free memory allocated to store data
-    } 
+    }
+
+    up(&sem_mtx);
+
+    return 0;
 }
 
 static void copyValues(struct work_struct *work) {
     unsigned long bufferFlags;
+    unsigned int extractedBytes = 0;
     unsigned int codes = 0;
-    char tempBuffer[BUFFER_SIZE] = "";
-    
+    unsigned int i;
+    char codeBuffer[9];
+    char tempBuffer[BUFFER_SIZE];
+    char *ptr = tempBuffer;
+    char *ptr2 = tempBuffer;
+    char *str;
+
     struct list_item *item = NULL;
 
     spin_lock_irqsave(&bufferSpinLock, bufferFlags);
 
     while (!kfifo_is_empty(&cbuf)) {
-        kfifo_out(&cbuf, tempBuffer, strlen(code_format));
+        extractedBytes += kfifo_out(&cbuf, &codeBuffer, strlen(code_format));
+        codeBuffer[strlen(code_format)] = '\0';
+        printk("kfifo out %d bytes and %s", extractedBytes, codeBuffer);
+        extractedBytes = sprintf(ptr, "%s", codeBuffer);
+        ptr += extractedBytes;
         codes++;
-        printk(KERN_INFO ">>> CODETIMER: Extracted %s form cbuf", tempBuffer);
     }
 
     kfifo_reset(&cbuf);
 
     spin_unlock_irqrestore(&bufferSpinLock, bufferFlags);
 
-    while (codes) {
-        printk(KERN_INFO ">>> CODETIMER: %s", tempBuffer);
-    }
-    
-    /*
-    while (codes) {
+    if (down_interruptible(&sem_mtx))
+        return -EINTR;
+
+    for (i = 0; i < codes; i++) {
         item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
 
-        s = (char *)vmalloc(strlen(str));
-        memcpy(s, str, strlen(str));
-        item->data = s;
+        str = (char *)vmalloc(strlen(code_format));
+        memcpy(str, ptr2, strlen(code_format));
+        ptr2 += strlen(code_format);
+        item->data = str;
 
         list_add_tail(&item->links, &myList); // Add node to the end of the list
     }
-    */
+
+    up(&sem_mtx);
 }
 
 /* Function invoked when timer expires (fires) */
@@ -223,11 +242,14 @@ static const struct proc_ops conf_entry_fops = {
 
 static int consumer_open(struct inode *inode, struct file *file) {
     try_module_get(THIS_MODULE);
+    // Fire timer
+    // No permitir que sea abierta por más de un consumidor
     return 0;
 }
 
 static int consumer_release(struct inode *inode, struct file *file) {
     module_put(THIS_MODULE);
+    // Desactivar el timer
     return 0;
 }
 
@@ -278,6 +300,8 @@ int init_timer_module( void ) {
     INIT_WORK(&copyValuesWork, copyValues);
 
     INIT_LIST_HEAD(&myList);
+
+    sema_init(&sem_mtx, 1);
 
     return retval;
 }
