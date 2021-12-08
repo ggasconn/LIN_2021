@@ -33,6 +33,9 @@ struct work_struct copyValuesWork;
 /* Syncro */
 DEFINE_SPINLOCK(bufferSpinLock);
 struct semaphore sem_mtx;
+struct semaphore list_queue;
+unsigned int nr_cons_waiting;
+unsigned int entryInUse = 0;
 
 /* Double linked list data */
 struct list_head myList;
@@ -82,18 +85,33 @@ int cleanList(void) {
     return 0;
 }
 
+int storeIntoList(char *buffer, unsigned int codes) {
+    char *str;
+    unsigned int i;
+    struct list_item *item = NULL;
+
+    for (i = 0; i < codes; i++) {
+        item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
+
+        str = (char *)vmalloc(strlen(code_format));
+        memcpy(str, buffer, strlen(code_format));
+        buffer += strlen(code_format);
+        item->data = str;
+
+        list_add_tail(&item->links, &myList); // Add node to the end of the list
+    }
+
+    return 0;
+}
+
 static void copyValues(struct work_struct *work) {
     unsigned long bufferFlags;
     unsigned int extractedBytes = 0;
     unsigned int codes = 0;
-    unsigned int i;
     char codeBuffer[9];
     char tempBuffer[BUFFER_SIZE];
     char *ptr = tempBuffer;
     char *ptr2 = tempBuffer;
-    char *str;
-
-    struct list_item *item = NULL;
 
     spin_lock_irqsave(&bufferSpinLock, bufferFlags);
 
@@ -110,18 +128,13 @@ static void copyValues(struct work_struct *work) {
 
     spin_unlock_irqrestore(&bufferSpinLock, bufferFlags);
 
-    if (down_interruptible(&sem_mtx))
-        return -EINTR;
+    down(&sem_mtx);
 
-    for (i = 0; i < codes; i++) {
-        item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
+    storeIntoList(ptr2, codes);
 
-        str = (char *)vmalloc(strlen(code_format));
-        memcpy(str, ptr2, strlen(code_format));
-        ptr2 += strlen(code_format);
-        item->data = str;
-
-        list_add_tail(&item->links, &myList); // Add node to the end of the list
+    if (nr_cons_waiting > 0) {
+        nr_cons_waiting--;
+        up(&list_queue);
     }
 
     up(&sem_mtx);
@@ -171,9 +184,8 @@ static void fire_timer(struct timer_list *timer) {
     }
 
     spin_unlock_irqrestore(&bufferSpinLock, bufferFlags);
-    
-    /* Re-activate the timer one second from now */
-    mod_timer(timer, jiffies + (timer_period_ms / 1000) * HZ); 
+
+    mod_timer(&my_timer, jiffies + (timer_period_ms / 1000) * HZ); 
 }
 
 
@@ -200,7 +212,7 @@ static ssize_t config_write(struct file *filp, const char __user *buf, size_t le
     } else 
         printk(KERN_INFO ">>> [ERROR] CODETIMER: Invalid input parameters!");
 
-    (*off)+=len;  /* Update the file pointer */
+    (*off) += len;  /* Update the file pointer */
 
     return len;
 }
@@ -221,7 +233,7 @@ static ssize_t config_read(struct file *filp, char __user *buf, size_t len, loff
     myBufferPtr += lastByte;
     nrBytes += lastByte;
 
-    lastByte = sprintf(myBufferPtr, "codeFormat=%s\n", code_format);
+    lastByte = sprintf(myBufferPtr, "code_format=%s\n", code_format);
     myBufferPtr += lastByte;
     nrBytes += lastByte;
   
@@ -241,21 +253,87 @@ static const struct proc_ops conf_entry_fops = {
 
 
 static int consumer_open(struct inode *inode, struct file *file) {
+    if (entryInUse) return -EBUSY;
+
+    entryInUse = 1;
+
     try_module_get(THIS_MODULE);
-    // Fire timer
-    // No permitir que sea abierta por más de un consumidor
+
+    /* Re-activate the timer one second from now */
+    add_timer(&my_timer); 
+
+
     return 0;
 }
 
 static int consumer_release(struct inode *inode, struct file *file) {
+    entryInUse = 0;
+
+    /* De-activate the timer */
+    del_timer_sync(&my_timer);
+    /* Wait until the job ends */
+    flush_work(&copyValuesWork);
+    /* Empty circulsr buffer */
+    kfifo_reset(&cbuf);
+    /* Empty linked list */
+    cleanList();
+
     module_put(THIS_MODULE);
-    // Desactivar el timer
+
     return 0;
 }
 
 static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
-    // TODO
-    return 0;
+    int totalBytes = 0;
+    char tempBuffer[512];
+    char *ptr = tempBuffer;
+
+    struct list_head *pos = NULL;
+    struct list_head *aux = NULL;
+    struct list_item *item = NULL;
+
+    if ((*off) > 0) return 0; /* Nothing left to read */
+
+    if (down_interruptible(&sem_mtx))
+        return -EINTR;
+
+    while(list_empty(&myList)) {
+        nr_cons_waiting++;
+
+        up(&sem_mtx);
+
+        if (down_interruptible(&list_queue)){
+            down(&sem_mtx);
+            nr_cons_waiting--;
+            up(&sem_mtx);
+            return -EINTR;
+        }
+
+        if (down_interruptible(&sem_mtx)){
+            nr_cons_waiting--;
+            return -EINTR;
+        }
+    }
+
+    list_for_each_safe(pos, aux, &myList) {
+        item = list_entry(pos, struct list_item, links);
+        totalBytes += sprintf(ptr, "%s\n", item->data);
+        ptr += strlen(code_format) + 1;
+
+        list_del(pos); // Delete node
+        
+        vfree(item->data);
+        vfree(item); // Free memory allocated to store data
+    }
+
+    if (copy_to_user(buf, tempBuffer, totalBytes))
+        return -EINVAL;
+
+    up(&sem_mtx);
+
+    (*off) += totalBytes;  /* Update the file pointer */
+
+    return totalBytes;
 }
 
 
@@ -280,7 +358,7 @@ int init_timer_module( void ) {
     if (conf_entry == NULL || consumer_entry == NULL)
         return -ENOMEM;
     
-    printk(">>> CODETIMER: /proc entries exported successfully");
+    printk(KERN_INFO ">>> CODETIMER: /proc entries exported successfully");
 
     spin_lock_init(&bufferSpinLock);
 
@@ -290,7 +368,7 @@ int init_timer_module( void ) {
     my_timer.expires = jiffies + (timer_period_ms / 1000) * HZ;  /* Activate it one second from now */
 
     /* Activate the timer for the first time */
-    add_timer(&my_timer); 
+    //add_timer(&my_timer); 
   
     emptyBufferWQ = create_workqueue("emptyBufferWQ");
 
@@ -302,6 +380,7 @@ int init_timer_module( void ) {
     INIT_LIST_HEAD(&myList);
 
     sema_init(&sem_mtx, 1);
+    sema_init(&list_queue, 0);
 
     return retval;
 }
