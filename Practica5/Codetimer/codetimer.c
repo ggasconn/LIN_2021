@@ -11,9 +11,6 @@
 #include <linux/list.h>
 #include <linux/semaphore.h>
 
-MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Codetimer Module");
-MODULE_AUTHOR("Guillermo Gascón");
 
 /* Circular buffer data */
 #define BUFFER_SIZE 32
@@ -52,13 +49,11 @@ char code_format[9] = "0000Aa";
 
 
 /* BPFTRACE trace functions */
-void noinline trace_timer(char c){
-    asm(" ");
-}
+void noinline trace_code_in_buffer(char* random_code, int cur_buf_size) { asm(" "); }
 
-void noinline trace_timer_msg(char* c){
-    asm(" ");
-}
+void noinline trace_code_in_list(char* random_code) { asm(" "); }
+
+void noinline trace_code_read(char* random_code) { asm(" "); }
 /* BPFTRACE trace functions */
 
 
@@ -99,6 +94,8 @@ int storeIntoList(char *buffer, unsigned int codes) {
         item->data = str;
 
         list_add_tail(&item->links, &myList); // Add node to the end of the list
+    
+        trace_code_in_list(str); /* BPFTRACE FUNCTION */
     }
 
     return 0;
@@ -132,6 +129,7 @@ static void copyValues(struct work_struct *work) {
 
     storeIntoList(ptr2, codes);
 
+    /* Wake up consumer, if any waiting */
     if (nr_cons_waiting > 0) {
         nr_cons_waiting--;
         up(&list_queue);
@@ -174,6 +172,7 @@ static void fire_timer(struct timer_list *timer) {
 
     printk(KERN_INFO ">>> CODETIMER: Adding code %s with length %ld", randomCode, strlen(randomCode));
     kfifo_in(&cbuf, &randomCode, strlen(randomCode));
+    trace_code_in_buffer(randomCode, kfifo_len(&cbuf)); /* BPFTRACE FUNCTION*/
 
     /* Check if the emergency_threshold has been passed and if so if the last queued work has ended */
     if (((kfifo_len(&cbuf) * 100) / BUFFER_SIZE) > emergency_threshold 
@@ -262,7 +261,6 @@ static int consumer_open(struct inode *inode, struct file *file) {
     /* Re-activate the timer one second from now */
     add_timer(&my_timer); 
 
-
     return 0;
 }
 
@@ -292,8 +290,6 @@ static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, lo
     struct list_head *aux = NULL;
     struct list_item *item = NULL;
 
-    if ((*off) > 0) return 0; /* Nothing left to read */
-
     if (down_interruptible(&sem_mtx))
         return -EINTR;
 
@@ -319,6 +315,8 @@ static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, lo
         item = list_entry(pos, struct list_item, links);
         totalBytes += sprintf(ptr, "%s\n", item->data);
         ptr += strlen(code_format) + 1;
+
+        trace_code_read(item->data); /* BPFTRACE FUNCTION */
 
         list_del(pos); // Delete node
         
@@ -366,9 +364,6 @@ int init_timer_module( void ) {
     timer_setup(&my_timer, fire_timer, 0);
     
     my_timer.expires = jiffies + (timer_period_ms / 1000) * HZ;  /* Activate it one second from now */
-
-    /* Activate the timer for the first time */
-    //add_timer(&my_timer); 
   
     emptyBufferWQ = create_workqueue("emptyBufferWQ");
 
@@ -400,6 +395,10 @@ void cleanup_timer_module( void ) {
     /* Wait until completion of the timer function (if it's currently running) and delete timer */
     del_timer_sync(&my_timer);
 }
+
+MODULE_LICENSE("GPL v2");
+MODULE_DESCRIPTION("Codetimer Module");
+MODULE_AUTHOR("Guillermo Gascón");
 
 module_init( init_timer_module );
 module_exit( cleanup_timer_module );
