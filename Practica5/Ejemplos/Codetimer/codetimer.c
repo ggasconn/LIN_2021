@@ -22,19 +22,29 @@ void noinline trace_timer_msg(char* c){
 static void fire_timer(struct timer_list *timer)
 {
     unsigned int rd = get_random_int();
-    unsigned int rx = rd % 1000;
-    char chx = (rx % 26) + 'a';
+    unsigned int rx;
+    char chx;
     int i;
 
     for (i = 0; i < strlen(code_format); i++){
         char c = code_format[i];
+        rx = rd % 1000;
 
-        if (c == '0')
-            trace_timer_msg("Im a 0");
-        else if (c == 'a')
-            trace_timer_msg("Im a a");
-        else
-            trace_timer_msg("Im a A");
+        if (c == '0'){
+            rx = rx %10;
+            char st[sizeof(rx)];
+            iota(rx, st, 10);
+            trace_timer_msg(st);
+        }
+        else if (c == 'a'){
+            chx = (rx % 26) + 'a';
+            trace_timer_msg(chx);
+        }
+        else{
+            chx = (rx % 26) + 'A';
+            trace_timer_msg(chx);
+        }
+        rd = (rd - rx)/10;
     }
 
     trace_timer(chx);
