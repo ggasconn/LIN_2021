@@ -101,7 +101,7 @@ int storeIntoList(char *buffer, unsigned int codes) {
     return 0;
 }
 
-static void copyValues(struct work_struct *work) {
+static void copy_items_into_list(struct work_struct *work) {
     unsigned long bufferFlags;
     unsigned int extractedBytes = 0;
     unsigned int codes = 0;
@@ -188,7 +188,7 @@ static void fire_timer(struct timer_list *timer) {
 }
 
 
-static ssize_t config_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
+static ssize_t codeconfig_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
     unsigned int value;
     char newCode[9];
     char myBuffer[128];
@@ -216,7 +216,7 @@ static ssize_t config_write(struct file *filp, const char __user *buf, size_t le
     return len;
 }
 
-static ssize_t config_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
+static ssize_t codeconfig_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
     int lastByte = 0;
     int nrBytes = 0;
     char myBuffer[512] = "";
@@ -246,12 +246,12 @@ static ssize_t config_read(struct file *filp, char __user *buf, size_t len, loff
 }
 
 static const struct proc_ops conf_entry_fops = {
-    .proc_read = config_read,
-    .proc_write = config_write,
+    .proc_read = codeconfig_read,
+    .proc_write = codeconfig_write,
 };
 
 
-static int consumer_open(struct inode *inode, struct file *file) {
+static int codetimer_open(struct inode *inode, struct file *file) {
     if (entryInUse) return -EBUSY;
 
     entryInUse = 1;
@@ -264,7 +264,7 @@ static int consumer_open(struct inode *inode, struct file *file) {
     return 0;
 }
 
-static int consumer_release(struct inode *inode, struct file *file) {
+static int codetimer_release(struct inode *inode, struct file *file) {
     entryInUse = 0;
 
     /* De-activate the timer */
@@ -281,7 +281,7 @@ static int consumer_release(struct inode *inode, struct file *file) {
     return 0;
 }
 
-static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
+static ssize_t codetimer_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
     int totalBytes = 0;
     char tempBuffer[512];
     char *ptr = tempBuffer;
@@ -336,9 +336,9 @@ static ssize_t consumer_read(struct file *filp, char __user *buf, size_t len, lo
 
 
 static const struct proc_ops consumer_entry_fops = {
-    .proc_read = consumer_read,
-    .proc_open = consumer_open,
-    .proc_release = consumer_release,
+    .proc_read = codetimer_read,
+    .proc_open = codetimer_open,
+    .proc_release = codetimer_release,
 };
 
 
@@ -370,7 +370,7 @@ int init_timer_module( void ) {
     if (!emptyBufferWQ)
         return -ENOMEM;
     
-    INIT_WORK(&copyValuesWork, copyValues);
+    INIT_WORK(&copyValuesWork, copy_items_into_list);
 
     INIT_LIST_HEAD(&myList);
 
