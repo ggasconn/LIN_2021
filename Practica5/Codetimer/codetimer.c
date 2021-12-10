@@ -26,6 +26,7 @@ static struct proc_dir_entry *consumer_entry;
 /* Workqueue data */
 static struct workqueue_struct *emptyBufferWQ;
 struct work_struct copyValuesWork;
+unsigned int workPending = 0;
 
 /* Syncro */
 DEFINE_SPINLOCK(bufferSpinLock);
@@ -44,7 +45,7 @@ struct list_item {
 
 /* Global variables to store config */
 unsigned int emergency_threshold = 75; /* Default to 75% */
-unsigned int timer_period_ms = 1000; /* Default 1 sec */
+unsigned int timer_period_ms = 500; /* Default 1 sec */
 char code_format[9] = "0000Aa";
 
 
@@ -80,17 +81,18 @@ int cleanList(void) {
     return 0;
 }
 
-int storeIntoList(char *buffer, unsigned int codes) {
+int storeIntoList(char *buffer, unsigned int bytes) {
     char *str;
-    unsigned int i;
     struct list_item *item = NULL;
 
-    for (i = 0; i < codes; i++) {
+    while (bytes) {
         item = (struct list_item *)vmalloc(sizeof(struct list_item)); // Allocate memory for the new item  
 
         str = (char *)vmalloc(strlen(code_format));
-        memcpy(str, buffer, strlen(code_format));
-        buffer += strlen(code_format);
+        sscanf(buffer, "%s", str);
+        buffer += strlen(str) + 1; /* Move buffer pointer forwar */
+        bytes -= strlen(str) + 1; /* Subtract read bytes */
+
         item->data = str;
 
         list_add_tail(&item->links, &myList); // Add node to the end of the list
@@ -104,22 +106,14 @@ int storeIntoList(char *buffer, unsigned int codes) {
 static void copy_items_into_list(struct work_struct *work) {
     unsigned long bufferFlags;
     unsigned int extractedBytes = 0;
-    unsigned int codes = 0;
-    char codeBuffer[9];
     char tempBuffer[BUFFER_SIZE];
     char *ptr = tempBuffer;
-    char *ptr2 = tempBuffer;
+
+    workPending = 1; // true
 
     spin_lock_irqsave(&bufferSpinLock, bufferFlags);
 
-    while (!kfifo_is_empty(&cbuf)) {
-        extractedBytes += kfifo_out(&cbuf, &codeBuffer, strlen(code_format));
-        codeBuffer[strlen(code_format)] = '\0';
-        printk("kfifo out %d bytes and %s", extractedBytes, codeBuffer);
-        extractedBytes = sprintf(ptr, "%s", codeBuffer);
-        ptr += extractedBytes;
-        codes++;
-    }
+    extractedBytes += kfifo_out(&cbuf, &tempBuffer, kfifo_len(&cbuf));
 
     kfifo_reset(&cbuf);
 
@@ -127,7 +121,7 @@ static void copy_items_into_list(struct work_struct *work) {
 
     down(&sem_mtx);
 
-    storeIntoList(ptr2, codes);
+    storeIntoList(ptr, extractedBytes);
 
     /* Wake up consumer, if any waiting */
     if (nr_cons_waiting > 0) {
@@ -136,6 +130,8 @@ static void copy_items_into_list(struct work_struct *work) {
     }
 
     up(&sem_mtx);
+
+    workPending = 0; // False;
 }
 
 /* Function invoked when timer expires (fires) */
@@ -171,12 +167,11 @@ static void fire_timer(struct timer_list *timer) {
     spin_lock_irqsave(&bufferSpinLock, bufferFlags);
 
     printk(KERN_INFO ">>> CODETIMER: Adding code %s with length %ld", randomCode, strlen(randomCode));
-    kfifo_in(&cbuf, &randomCode, strlen(randomCode));
+    kfifo_in(&cbuf, &randomCode, strlen(randomCode) + 1);
     trace_code_in_buffer(randomCode, kfifo_len(&cbuf)); /* BPFTRACE FUNCTION*/
 
     /* Check if the emergency_threshold has been passed and if so if the last queued work has ended */
-    if (((kfifo_len(&cbuf) * 100) / BUFFER_SIZE) > emergency_threshold 
-                                    && work_pending(&copyValuesWork) == 0) {
+    if (((kfifo_len(&cbuf) * 100) / BUFFER_SIZE) > emergency_threshold && workPending == 0) {
         printk(">>> CODETIMER: Scheduling work, emergency threshold triggered");
         currentCPU = smp_processor_id();
         queue_work_on((currentCPU % 2 == 0) ? 1 : 0, emptyBufferWQ, &copyValuesWork);
@@ -184,7 +179,7 @@ static void fire_timer(struct timer_list *timer) {
 
     spin_unlock_irqrestore(&bufferSpinLock, bufferFlags);
 
-    mod_timer(&my_timer, jiffies + (timer_period_ms / 1000) * HZ); 
+    mod_timer(&my_timer, jiffies + msecs_to_jiffies(timer_period_ms)); 
 }
 
 
@@ -314,7 +309,7 @@ static ssize_t codetimer_read(struct file *filp, char __user *buf, size_t len, l
     list_for_each_safe(pos, aux, &myList) {
         item = list_entry(pos, struct list_item, links);
         totalBytes += sprintf(ptr, "%s\n", item->data);
-        ptr += strlen(code_format) + 1;
+        ptr += strlen(item->data) + 1;
 
         trace_code_read(item->data); /* BPFTRACE FUNCTION */
 
@@ -363,7 +358,7 @@ int init_timer_module( void ) {
     /* Create timer */
     timer_setup(&my_timer, fire_timer, 0);
     
-    my_timer.expires = jiffies + (timer_period_ms / 1000) * HZ;  /* Activate it one second from now */
+    my_timer.expires = jiffies + msecs_to_jiffies(timer_period_ms);  /* Activate it one second from now */
   
     emptyBufferWQ = create_workqueue("emptyBufferWQ");
 
