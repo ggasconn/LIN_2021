@@ -1,1 +1,0 @@
-cmd_/home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue1.mod := { echo  /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue1.o;  echo; } > /home/kernel/Escritorio/FicherosP5/Ejemplos/workQ/workqueue1.mod
