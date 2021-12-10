@@ -398,7 +398,7 @@ void cleanup_timer_module( void ) {
 
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("Codetimer Module");
-MODULE_AUTHOR("Guillermo Gascón");
+MODULE_AUTHOR("Andrés Eduardo Salazar Molina, Guillermo Gascón Celdrán");
 
 module_init( init_timer_module );
 module_exit( cleanup_timer_module );
